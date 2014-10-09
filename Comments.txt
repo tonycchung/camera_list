@@ -1,0 +1,21 @@
+The script can be run with 'ruby camera_script.rb'. You must have Ruby installed, this was written in 2.1.1.
+
+I initially tried TDDing this problem as that's how I'm used to working. I was having issues with which directories the test, test files and scripts were running in and didn't want to waste too much of my hour to try and figure out those issues so I ended up just trying to write the script. I continued to use an object-oriented approach. I left the test folder if you wanted to see my simple tests and test files I intended to use.
+
+I initially saw there were many duplicates in the original camera_list so I created a deduplicating method to cut the list down. IO.foreach enumerates a file line by line. I used chomp which gets rid of trailing whitespace and then put the line into an array if the array already didn't include the camera. Alternatively I could have just shoved everything into the array and used array.uniq which may or may not have been faster - I didn't do a benchmark as my original method worked quickly enough.
+
+Mapping each camera to a proper value was the hard part. Given the time constraints I thought of using a matching algorithm to map each camera to a proper model if they were a close enough match. I used a ruby gem called Amatch that easily gives you several matching algorithms to use. I chose Jaro-Winkler as it uses the Jaro algorithm but with additional weighting towards common prefixes and it is supposed to be good for short strings. 
+
+My merge method takes the deduplicated array and sets the initial map value to the first item in the list as well as mapping the first item to itself. Then it iterates through the list and if the Jaro-Winkler distances between the current camera and current map value is less than .85 (played around with this value to see what worked well), it sets the current camera as the new map value and maps it. If the models are close enough as it is, it simply maps the current camera to the current map value.
+
+The private simplify method simply takes a camera and downcases it and deletes any whitespace in between - this is to make it easier to compare strings more consistently ('mark ii' would match 'MARK II' by both being simplified to 'markii')
+ 
+This merge method works decently but not perfectly. It doesn't select a nice model name such as 'Canon 5D Mark II' but simply the first model in the list it comes across. It also doesn't do a good job of differentiating between close camera models such as a Mark II vs Mark III. 
+
+Looking at the problem now there aren't too many different camera models. The deduplicated list was around 400 but many of them were still duplicates and some weren't even cameras at all (computer generated HD?). If I had another hour I could probably create a proper map of camera models by hand and then map each camera to the appropriate model as before.
+
+In removing non-camera items I was thinking of creating a list of camera companies / models and then deleting any cameras in the that had zero matches in the companies / model list. I'm sure a site like Wikipedia already has a list of popular camera companies that I could've used and it would have been fun to try and scrape that data into a nice list using nokogiri.
+
+Overall it was a fun problem and definitely challenging in that I couldn't come up with a perfect solution within the hour but maybe if I spent some more time thinking and researching I could definitely improve my solution alot.
+
+
